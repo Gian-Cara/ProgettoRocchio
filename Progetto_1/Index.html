@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestore Attività</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f8f9fa;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 50px;
+    }
+    h1 {
+      margin-bottom: 20px;
+    }
+    .contenitore-input {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    input, select {
+      padding: 10px;
+      margin: 5px;
+      font-size: 16px;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      margin: 5px;
+      cursor: pointer; /* Aggiunto per indicare che i bottoni sono cliccabili */
+    }
+    .attivita {
+      margin: 10px 0;
+      padding: 10px;
+      border-left: 5px solid #17a2b8; /* Mantenuto il bordo laterale */
+      border-radius: 5px;
+      color: #333; /* Cambiato il colore del testo per leggibilità su sfondo chiaro */
+      background-color: #ffffff; /* Sfondo bianco per le attività */
+      border: 1px solid #e9ecef; /* Aggiunto un bordo leggero */
+      width: 80%; /* Larghezza fissa per le attività */
+      max-width: 600px; /* Larghezza massima per le attività */
+      box-shadow: 0 2px 4px rgba(0,0,0,.05); /* Ombra leggera per un aspetto migliore */
+      text-align: left; /* Allinea il testo a sinistra */
+    }
+    .comandi {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-top: 10px; /* Aumentato il margine superiore */
+      justify-content: flex-end; /* Allinea i comandi a destra */
+    }
+  </style>
+</head>
+<body>
+  <h1>Task Manager</h1>
+  <div class="contenitore-input">
+    <input type="text" id="nomeAttivita" placeholder="Nome attività">
+    <select id="statoAttivita">
+      <option value="Da fare">Da fare</option>
+      <option value="In corso">In corso</option>
+      <option value="Completata">Completata</option>
+    </select>
+    <button onclick="aggiungiAttivita()">Aggiungi</button>
+    <br>
+    <input type="text" id="cerca" placeholder="Cerca attività" oninput="cercaAttivita()">
+    <select id="filtroStato" onchange="filtraPerStato()">
+      <option value="">Tutti gli stati</option>
+      <option value="Da fare">Da fare</option>
+      <option value="In corso">In corso</option>
+      <option value="Completata">Completata</option>
+    </select>
+  </div>
+
+  <div id="listaAttivita"></div>
+
+  <script>
+    let listaAttivita = [];
+
+    // Rimosso l'array coloriSfondo e la funzione getColoreCasuale perché non più necessari
+
+    function aggiornaLista() {
+      const contenitore = document.getElementById('listaAttivita');
+      contenitore.innerHTML = '';
+
+      let filtro = document.getElementById('filtroStato').value;
+      let ricerca = document.getElementById('cerca').value.toLowerCase();
+
+      listaAttivita.filter(attivita => {
+        return (filtro === '' || attivita.stato === filtro) &&
+               (attivita.nome.toLowerCase().includes(ricerca));
+      }).forEach((attivita, index) => {
+        const div = document.createElement('div');
+        div.className = 'attivita';
+        // Rimosso: div.style.backgroundColor = attivita.colore;
+        div.innerHTML = `
+          <strong>${attivita.nome}</strong> - <em>${attivita.stato}</em>
+          <div class="comandi">
+            <button onclick="modificaNome(${index})">Modifica nome</button>
+            <button onclick="cambiaStatoTesto(${index})">Cambia Stato</button>
+            <button onclick="rimuoviAttivita(${index})">Rimuovi</button>
+          </div>
+        `;
+        contenitore.appendChild(div);
+      });
+    }
+
+    function aggiungiAttivita() {
+      const nome = document.getElementById('nomeAttivita').value.trim();
+      const stato = document.getElementById('statoAttivita').value;
+      if (nome) {
+        // Non è più necessario assegnare un colore casuale all'attività
+        listaAttivita.push({ nome, stato }); 
+        document.getElementById('nomeAttivita').value = '';
+        aggiornaLista();
+      }
+    }
+
+    function rimuoviAttivita(index) {
+      listaAttivita.splice(index, 1);
+      aggiornaLista();
+    }
+
+    function modificaNome(index) {
+      const nuovoNome = prompt("Inserisci il nuovo nome dell'attività:", listaAttivita[index].nome);
+      if (nuovoNome !== null && nuovoNome.trim() !== "") { // Controlla anche che non sia vuoto dopo il trim
+        listaAttivita[index].nome = nuovoNome.trim(); // Trimma il nuovo nome
+        aggiornaLista();
+      }
+    }
+
+    // Nuova funzione per cambiare lo stato tramite input testuale
+    function cambiaStatoTesto(index) {
+      const statoAttuale = listaAttivita[index].stato;
+      const nuovoStato = prompt(`Inserisci il nuovo stato per "${listaAttivita[index].nome}" (attuale: ${statoAttuale}). Scegli tra "Da fare", "In corso" o "Completata".`);
+      
+      if (nuovoStato !== null) { // Controlla se l'utente ha premuto Annulla
+        const statoValidato = nuovoStato.trim().charAt(0).toUpperCase() + nuovoStato.trim().slice(1).toLowerCase(); // Rende la prima lettera maiuscola e il resto minuscolo
+        if (["Da fare", "In corso", "Completata"].includes(statoValidato)) {
+          listaAttivita[index].stato = statoValidato;
+          aggiornaLista();
+        } else {
+          alert("Stato non valido. Scegli tra 'Da fare', 'In corso' o 'Completata'.");
+        }
+      }
+    }
+
+    function filtraPerStato() {
+      aggiornaLista();
+    }
+
+    function cercaAttivita() {
+      aggiornaLista();
+    }
+
+    // Carica la lista all'avvio
+    document.addEventListener('DOMContentLoaded', aggiornaLista);
+  </script>
+</body>
+</html>
