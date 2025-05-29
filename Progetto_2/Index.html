@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cronometro</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0f0f0;
+      text-align: center;
+      padding: 50px;
+    }
+    h1 {
+      margin-bottom: 30px;
+    }
+    #cronometro {
+      font-size: 64px;
+      font-weight: bold;
+      margin-bottom: 20px;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 18px;
+      margin: 5px;
+      cursor: pointer;
+    }
+    .giro {
+      font-size: 24px;
+      font-weight: bold;
+      margin: 10px auto;
+      padding: 10px;
+      width: fit-content;
+      border-radius: 8px;
+      /* Il colore del testo rimane bianco per chiarezza se decidi di aggiungere un bordo o uno sfondo più chiaro */
+      color: black; 
+      border: 1px solid #ccc; /* Aggiunto un bordo per delimitare i giri */
+    }
+  </style>
+</head>
+<body>
+  <h1>Cronometro</h1>
+  <div id="cronometro">00:00:00</div>
+  <button onclick="startCronometro()">Start</button>
+  <button onclick="stopCronometro()">Stop</button>
+  <button onclick="resetCronometro()">Reset</button>
+  <button onclick="salvaGiro()">Giro</button>
+
+  <div id="listaGiri"></div>
+
+  <script>
+    let startTime, interval;
+    let tempoTrascorso = 0;
+    const cronometro = document.getElementById('cronometro');
+    const listaGiri = document.getElementById('listaGiri');
+    // const colori = ['#007bff', '#dc3545', '#ffc107', '#28a745', '#6610f2', '#17a2b8', '#fd7e14']; // Questa riga non è più necessaria
+
+    function aggiornaDisplay() {
+      let tempo = Date.now() - startTime + tempoTrascorso;
+      let ms = Math.floor((tempo % 1000) / 10);
+      let sec = Math.floor((tempo / 1000) % 60);
+      let min = Math.floor((tempo / 60000));
+
+      cronometro.textContent = `${String(min).padStart(2, '0')}:${String(sec).padStart(2, '0')}:${String(ms).padStart(2, '0')}`;
+    }
+
+    function startCronometro() {
+      if (!interval) {
+        startTime = Date.now();
+        interval = setInterval(aggiornaDisplay, 10);
+      }
+    }
+
+    function stopCronometro() {
+      if (interval) {
+        clearInterval(interval);
+        interval = null;
+        tempoTrascorso += Date.now() - startTime;
+      }
+    }
+
+    function resetCronometro() {
+      clearInterval(interval);
+      interval = null;
+      tempoTrascorso = 0;
+      cronometro.textContent = "00:00:00";
+      listaGiri.innerHTML = "";
+    }
+
+    function salvaGiro() {
+      const tempo = cronometro.textContent;
+      const div = document.createElement('div');
+      div.className = 'giro';
+      // div.style.backgroundColor = colori[Math.floor(Math.random() * colori.length)]; // Questa riga è stata rimossa
+      div.textContent = tempo;
+      listaGiri.appendChild(div);
+    }
+  </script>
+</body>
+</html>
