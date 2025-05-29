@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Meteo App</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #e0f7fa;
+      text-align: center;
+      padding: 50px;
+    }
+    h1 {
+      font-size: 48px;
+      margin-bottom: 30px;
+    }
+    #meteo {
+      font-size: 24px;
+      font-weight: bold;
+      padding: 20px;
+      border-radius: 10px;
+      display: inline-block;
+      margin-top: 20px;
+      background-color: white;
+      color: black;
+    }
+    input, button {
+      font-size: 20px;
+      padding: 10px;
+      margin: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Meteo Attuale</h1>
+  <div>
+    <input type="text" id="latitudine" placeholder="Latitudine" value="46.0679">
+    <input type="text" id="longitudine" placeholder="Longitudine" value="11.1211">
+    <button onclick="caricaMeteo()">Mostra Meteo</button>
+  </div>
+  <div id="meteo"></div>
+
+  <script>
+    function caricaMeteo() {
+      const lat = document.getElementById("latitudine").value;
+      const lon = document.getElementById("longitudine").value;
+
+      const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,precipitation,rain,cloud_cover,wind_speed_10m,weather_code`;
+
+      fetch(url)
+        .then(response => response.json())
+        .then(data => {
+          const meteo = data.current;
+          const contenitore = document.getElementById("meteo");
+          contenitore.innerHTML = `
+            Temperatura: ${meteo.temperature_2m}°C<br>
+            Umidità: ${meteo.relative_humidity_2m}%<br>
+            Precipitazioni: ${meteo.precipitation} mm<br>
+            Pioggia: ${meteo.rain} mm<br>
+            Copertura nuvolosa: ${meteo.cloud_cover}%<br>
+            Vento: ${meteo.wind_speed_10m} km/h<br>
+            Codice meteo: ${meteo.weather_code}
+          `;
+        })
+        .catch(error => {
+          document.getElementById("meteo").innerText = "Errore nel caricamento del meteo.";
+          console.error("Errore fetch:", error);
+        });
+    }
+  </script>
+</body>
+</html>
