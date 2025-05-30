@@ -29,27 +29,19 @@
       padding: 10px 20px;
       font-size: 16px;
       margin: 5px;
-      cursor: pointer; /* Aggiunto per indicare che i bottoni sono cliccabili */
     }
     .attivita {
       margin: 10px 0;
       padding: 10px;
-      border-left: 5px solid #17a2b8; /* Mantenuto il bordo laterale */
+      border-left: 5px solid #17a2b8;
       border-radius: 5px;
-      color: #333; /* Cambiato il colore del testo per leggibilità su sfondo chiaro */
-      background-color: #ffffff; /* Sfondo bianco per le attività */
-      border: 1px solid #e9ecef; /* Aggiunto un bordo leggero */
-      width: 80%; /* Larghezza fissa per le attività */
-      max-width: 600px; /* Larghezza massima per le attività */
-      box-shadow: 0 2px 4px rgba(0,0,0,.05); /* Ombra leggera per un aspetto migliore */
-      text-align: left; /* Allinea il testo a sinistra */
+      color: #fff;
     }
     .comandi {
       display: flex;
       flex-wrap: wrap;
       gap: 5px;
-      margin-top: 10px; /* Aumentato il margine superiore */
-      justify-content: flex-end; /* Allinea i comandi a destra */
+      margin-top: 5px;
     }
   </style>
 </head>
@@ -78,7 +70,12 @@
   <script>
     let listaAttivita = [];
 
-    // Rimosso l'array coloriSfondo e la funzione getColoreCasuale perché non più necessari
+    const coloriSfondo = ["#007bff", "#dc3545", "#ffc107", "#28a745", "#6610f2", "#17a2b8", "#fd7e14"];
+
+    function getColoreCasuale() {
+      const indice = Math.floor(Math.random() * coloriSfondo.length);
+      return coloriSfondo[indice];
+    }
 
     function aggiornaLista() {
       const contenitore = document.getElementById('listaAttivita');
@@ -93,12 +90,16 @@
       }).forEach((attivita, index) => {
         const div = document.createElement('div');
         div.className = 'attivita';
-        // Rimosso: div.style.backgroundColor = attivita.colore;
+        div.style.backgroundColor = attivita.colore;
         div.innerHTML = `
           <strong>${attivita.nome}</strong> - <em>${attivita.stato}</em>
           <div class="comandi">
             <button onclick="modificaNome(${index})">Modifica nome</button>
-            <button onclick="cambiaStatoTesto(${index})">Cambia Stato</button>
+            <select onchange="cambiaStatoDropdown(${index}, this.value)">
+              <option value="Da fare" ${attivita.stato === "Da fare" ? "selected" : ""}>Da fare</option>
+              <option value="In corso" ${attivita.stato === "In corso" ? "selected" : ""}>In corso</option>
+              <option value="Completata" ${attivita.stato === "Completata" ? "selected" : ""}>Completata</option>
+            </select>
             <button onclick="rimuoviAttivita(${index})">Rimuovi</button>
           </div>
         `;
@@ -110,8 +111,8 @@
       const nome = document.getElementById('nomeAttivita').value.trim();
       const stato = document.getElementById('statoAttivita').value;
       if (nome) {
-        // Non è più necessario assegnare un colore casuale all'attività
-        listaAttivita.push({ nome, stato }); 
+        const colore = getColoreCasuale();
+        listaAttivita.push({ nome, stato, colore });
         document.getElementById('nomeAttivita').value = '';
         aggiornaLista();
       }
@@ -124,25 +125,16 @@
 
     function modificaNome(index) {
       const nuovoNome = prompt("Inserisci il nuovo nome dell'attività:", listaAttivita[index].nome);
-      if (nuovoNome !== null && nuovoNome.trim() !== "") { // Controlla anche che non sia vuoto dopo il trim
-        listaAttivita[index].nome = nuovoNome.trim(); // Trimma il nuovo nome
+      if (nuovoNome) {
+        listaAttivita[index].nome = nuovoNome;
         aggiornaLista();
       }
     }
 
-    // Nuova funzione per cambiare lo stato tramite input testuale
-    function cambiaStatoTesto(index) {
-      const statoAttuale = listaAttivita[index].stato;
-      const nuovoStato = prompt(`Inserisci il nuovo stato per "${listaAttivita[index].nome}" (attuale: ${statoAttuale}). Scegli tra "Da fare", "In corso" o "Completata".`);
-      
-      if (nuovoStato !== null) { // Controlla se l'utente ha premuto Annulla
-        const statoValidato = nuovoStato.trim().charAt(0).toUpperCase() + nuovoStato.trim().slice(1).toLowerCase(); // Rende la prima lettera maiuscola e il resto minuscolo
-        if (["Da fare", "In corso", "Completata"].includes(statoValidato)) {
-          listaAttivita[index].stato = statoValidato;
-          aggiornaLista();
-        } else {
-          alert("Stato non valido. Scegli tra 'Da fare', 'In corso' o 'Completata'.");
-        }
+    function cambiaStatoDropdown(index, nuovoStato) {
+      if (["Da fare", "In corso", "Completata"].includes(nuovoStato)) {
+        listaAttivita[index].stato = nuovoStato;
+        aggiornaLista();
       }
     }
 
@@ -153,9 +145,6 @@
     function cercaAttivita() {
       aggiornaLista();
     }
-
-    // Carica la lista all'avvio
-    document.addEventListener('DOMContentLoaded', aggiornaLista);
   </script>
 </body>
 </html>
